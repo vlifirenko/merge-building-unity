@@ -9,7 +9,7 @@ namespace DI
         private readonly Dictionary<(string, Type), DIRegistration> _registrations = new Dictionary<(string, Type), DIRegistration>();
         private readonly HashSet<(string, Type)> _resolutions = new HashSet<(string, Type)>();
 
-        public DIContainer(DIContainer parentContainer)
+        public DIContainer(DIContainer parentContainer = null)
         {
             _parentContainer = parentContainer;
         }
@@ -97,7 +97,7 @@ namespace DI
 
             _registrations[key] = new DIRegistration
             {
-                Factory = c => factory,
+                Factory = c => factory(c),
                 IsSingleton = isSingleton
             };
         }
