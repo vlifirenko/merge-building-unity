@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using Building.Game.Gameplay.Root;
+using Building.Game.MainMenu.Root;
 using Building.Utils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -41,6 +42,13 @@ namespace Building.Game.GameRoot
                 _coroutines.StartCoroutine(LoadAndStartGameplay());
                 return;
             }
+            
+            if (sceneName == Scenes.MAIN_MENU)
+            {
+                _coroutines.StartCoroutine(LoadAndStartMainMenu());
+                return;
+            }
+            
             if (sceneName != Scenes.BOOT)
             {
                 return;
@@ -59,7 +67,28 @@ namespace Building.Game.GameRoot
             yield return new WaitForSeconds(2);
 
             var sceneEntryPoint = Object.FindFirstObjectByType<GameplayEntryPoint>();
-            sceneEntryPoint.Run();
+            sceneEntryPoint.Run(_uiRoot);
+
+            sceneEntryPoint.GoToMenuSceneRequested += ()
+                => _coroutines.StartCoroutine(LoadAndStartMainMenu());
+            
+            _uiRoot.HideLoadingScreen();
+        }
+        
+        private IEnumerator LoadAndStartMainMenu()
+        {
+            _uiRoot.ShowLoadingScreen();
+
+            yield return LoadScene(Scenes.BOOT);
+            yield return LoadScene(Scenes.MAIN_MENU);
+
+            yield return new WaitForSeconds(2);
+
+            var sceneEntryPoint = Object.FindFirstObjectByType<MainMenuEntryPoint>();
+            sceneEntryPoint.Run(_uiRoot);
+            
+            sceneEntryPoint.GoToGameplaySceneRequested += ()
+                => _coroutines.StartCoroutine(LoadAndStartGameplay());
             
             _uiRoot.HideLoadingScreen();
         }
